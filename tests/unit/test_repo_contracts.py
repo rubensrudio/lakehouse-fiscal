@@ -45,3 +45,18 @@ def test_required_make_targets_exist() -> None:
         "maintenance",
         "test-maintenance-scale10",
     }
+
+
+def test_cfop_reference_is_a_versioned_package_resource() -> None:
+    resource = ROOT / "src/lakehouse_fiscal/gold/data/cfop_reference.csv"
+    assert resource.is_file()
+    assert resource.read_text(encoding="utf-8").startswith(
+        "cfop,grupo,tipo_operacao,gera_receita,descricao"
+    )
+    assert "/data/" in (ROOT / ".gitignore").read_text(encoding="utf-8")
+
+
+def test_teardown_removes_persistent_local_catalog() -> None:
+    teardown = (ROOT / "scripts/teardown_local.sh").read_text(encoding="utf-8")
+    assert "metastore_db spark-warehouse" in teardown
+    assert "derby.log" in teardown

@@ -32,7 +32,14 @@ class MergeResult:
     version: int
 
 
-def _prepare(df: DataFrame, table: str, batch_id: str, stage: str) -> None:
+def _prepare(
+    df: DataFrame,
+    table: str,
+    batch_id: str,
+    stage: str,
+    *,
+    create_if_missing: bool = True,
+) -> str | None:
     settings = load_settings()
     catalog, layer, logical_table = parse(table, settings)
     df.sparkSession.conf.set(
@@ -43,16 +50,24 @@ def _prepare(df: DataFrame, table: str, batch_id: str, stage: str) -> None:
         schema = f"{catalog}_{layer}"
         df.sparkSession.sql(f"CREATE DATABASE IF NOT EXISTS {schema}")
         location = table_location(layer, logical_table, settings)
-        if not df.sparkSession.catalog.tableExists(table):
-            if DeltaTable.isDeltaTable(df.sparkSession, location):
+        catalog_exists = df.sparkSession.catalog.tableExists(table)
+        delta_exists = DeltaTable.isDeltaTable(df.sparkSession, location)
+        if catalog_exists and not delta_exists:
+            LOGGER.warning("Dropping stale local catalog entry '%s'; Delta data is absent.", table)
+            df.sparkSession.sql(f"DROP TABLE {table}")
+            catalog_exists = False
+        if not catalog_exists:
+            if delta_exists:
                 df.sparkSession.sql(
                     f"CREATE TABLE IF NOT EXISTS {table} USING DELTA LOCATION '{location}'"
                 )
-            else:
+            elif create_if_missing:
                 empty = df.limit(0)
                 empty.write.format("delta").mode("overwrite").option("path", location).saveAsTable(
                     table
                 )
+        return location
+    return None
 
 
 def _version(table: str, spark: SparkSession) -> int:
@@ -82,12 +97,17 @@ def overwrite(
     stage: str,
     partition_by: Sequence[str] = (),
 ) -> WriteResult:
-    _prepare(df, table, batch_id, stage)
+    location = _prepare(df, table, batch_id, stage, create_if_missing=False)
     writer = df.write.format("delta").mode("overwrite").option("overwriteSchema", "true")
     if partition_by:
         writer = writer.partitionBy(*partition_by)
     rows = df.count()
-    writer.saveAsTable(table)
+    if location is None:
+        writer.saveAsTable(table)
+    elif df.sparkSession.catalog.tableExists(table):
+        writer.save(location)
+    else:
+        writer.option("path", location).saveAsTable(table)
     return WriteResult(rows, _version(table, df.sparkSession))
 
 

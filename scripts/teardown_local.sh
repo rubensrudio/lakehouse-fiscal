@@ -6,3 +6,5 @@ else
   compose=(docker-compose)
 fi
 "${compose[@]}" down -v --remove-orphans
+rm -rf -- metastore_db spark-warehouse
+rm -f -- derby.log

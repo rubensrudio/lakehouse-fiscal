@@ -82,7 +82,7 @@ Measured locally on 2026-09-16 with Colima limited to 4 CPU and 8 GB RAM, using 
 | Gold item fact | 50,000 rows |
 | Quarantined rows in the valid seed | 0 |
 | Second run | 0 Bronze, 0 Silver and 0 Gold inserts/updates |
-| Test coverage | 83.36% global |
+| Test coverage | 83.07% global |
 | Critical-module coverage | transforms 100%, SCD2 98.59%, expectations 98.39% |
 
 The cold image-pull time is intentionally omitted because it was not measured from a cache-free

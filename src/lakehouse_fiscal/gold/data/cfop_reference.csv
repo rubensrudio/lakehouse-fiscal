@@ -1,0 +1,8 @@
+cfop,grupo,tipo_operacao,gera_receita,descricao
+5101,venda_producao,saida,true,Venda de produção dentro do estado
+5102,venda_terceiros,saida,true,Venda de mercadoria dentro do estado
+6101,venda_producao,saida,true,Venda de produção interestadual
+6102,venda_terceiros,saida,true,Venda de mercadoria interestadual
+5202,devolucao,saida,false,Devolução dentro do estado
+6202,devolucao,saida,false,Devolução interestadual
+
