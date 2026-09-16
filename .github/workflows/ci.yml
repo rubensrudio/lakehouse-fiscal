@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.21"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: uv sync
+      - run: make lint
+      - run: make test-unit
+      - run: uv build
+
+  integration:
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.5.21"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: uv sync
+      - run: cp .env.example .env
+      - run: make bootstrap
+      - run: make seed
+      - run: make run-all
+      - run: make verify
+      - run: make test
+      - name: Publish coverage summary
+        if: always()
+        run: |
+          echo "## Test coverage" >> "$GITHUB_STEP_SUMMARY"
+          uv run python -c 'import json; d=json.load(open("coverage.json")); print("Global: {:.2f}%".format(d["totals"]["percent_covered"]))' >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: make teardown
