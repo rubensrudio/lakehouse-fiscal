@@ -1,0 +1,11 @@
+profile: local
+catalog: lakehouse_fiscal
+storage_root: s3a://lakehouse-fiscal
+landing_prefix: landing
+checkpoint_prefix: _checkpoints
+jdbc: jdbc:postgresql://postgres:5432/lakehouse_fiscal
+secret_scope: lakehouse-fiscal
+seed: 42
+min_vacuum_retain_hours: 168
+max_files_per_trigger: 100
+

@@ -1,0 +1,40 @@
+FROM apache/spark:3.5.3-scala2.12-java17-python3-ubuntu AS spark-runtime
+
+FROM python:3.11-slim-bookworm
+
+ARG SPARK_VERSION=3.5.3
+ARG HADOOP_AWS_VERSION=3.3.4
+ARG AWS_SDK_VERSION=1.12.262
+ARG DELTA_VERSION=3.2.1
+ARG POSTGRES_JDBC_VERSION=42.7.4
+
+COPY --from=spark-runtime /opt/spark /opt/spark
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl openjdk-17-jre-headless procps \
+    && for artifact in \
+      "org/apache/hadoop/hadoop-aws/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" \
+      "com/amazonaws/aws-java-sdk-bundle/${AWS_SDK_VERSION}/aws-java-sdk-bundle-${AWS_SDK_VERSION}.jar" \
+      "io/delta/delta-spark_2.12/${DELTA_VERSION}/delta-spark_2.12-${DELTA_VERSION}.jar" \
+      "io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" \
+      "org/postgresql/postgresql/${POSTGRES_JDBC_VERSION}/postgresql-${POSTGRES_JDBC_VERSION}.jar"; do \
+        curl -fsSL "https://repo1.maven.org/maven2/${artifact}" -o "/opt/spark/jars/$(basename "${artifact}")"; \
+      done \
+    && apt-get purge -y curl \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV SPARK_HOME=/opt/spark
+ENV PATH=/opt/spark/bin:$PATH
+ENV PYSPARK_PYTHON=python3
+ENV PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+WORKDIR /workspace
+COPY pyproject.toml README.md* ./
+COPY src ./src
+RUN pip install --no-cache-dir --no-deps . \
+    && pip install --no-cache-dir --no-deps delta-spark==3.2.1 \
+    && pip install --no-cache-dir "faker>=28,<29" "psycopg[binary]>=3.2,<4" \
+       "python-dotenv>=1,<2" "pyyaml>=6,<7" \
+       "chispa>=0.10,<1" "pytest>=8,<9" "pytest-cov>=5,<7"
+
+CMD ["bash", "-lc", "tail -f /dev/null"]

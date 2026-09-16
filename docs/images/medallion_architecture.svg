@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#08111f"/><stop offset="1" stop-color="#102a43"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#80cbc4"/>
+    </marker>
+    <style>
+      .title{font:700 42px system-ui,sans-serif;fill:#f7fafc}.sub{font:22px system-ui,sans-serif;fill:#b8c7d9}
+      .h{font:700 24px system-ui,sans-serif;fill:#fff}.t{font:18px system-ui,sans-serif;fill:#e6edf5}
+      .edge{stroke:#80cbc4;stroke-width:5;fill:none;marker-end:url(#arrow)}
+      .box{stroke-width:3;rx:22}.note{font:16px system-ui,sans-serif;fill:#9fb3c8}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="800" y="70" text-anchor="middle" class="title">lakehouse-fiscal · MVP architecture</text>
+  <text x="800" y="108" text-anchor="middle" class="sub">Reproducible local medallion pipeline · synthetic Brazilian NF-e</text>
+
+  <rect x="60" y="300" width="230" height="150" class="box" fill="#3f2a56" stroke="#c4a7e7"/>
+  <text x="175" y="355" text-anchor="middle" class="h">PostgreSQL 16</text>
+  <text x="175" y="390" text-anchor="middle" class="t">Synthetic ERP source</text>
+  <text x="175" y="420" text-anchor="middle" class="t">NF-e · items · events</text>
+
+  <rect x="380" y="230" width="250" height="170" class="box" fill="#5b3b20" stroke="#d99a4e"/>
+  <text x="505" y="285" text-anchor="middle" class="h">Bronze Delta</text>
+  <text x="505" y="320" text-anchor="middle" class="t">Raw JDBC batch</text>
+  <text x="505" y="350" text-anchor="middle" class="t">Idempotent MERGE</text>
+  <text x="505" y="380" text-anchor="middle" class="t">Batch ledger</text>
+
+  <rect x="380" y="510" width="250" height="135" class="box" fill="#472f3c" stroke="#e091b0"/>
+  <text x="505" y="560" text-anchor="middle" class="h">Quarantine</text>
+  <text x="505" y="595" text-anchor="middle" class="t">Payload + failed rules</text>
+  <text x="505" y="625" text-anchor="middle" class="t">No silent row loss</text>
+
+  <rect x="720" y="230" width="250" height="170" class="box" fill="#33424d" stroke="#aab8c2"/>
+  <text x="845" y="285" text-anchor="middle" class="h">Silver Delta</text>
+  <text x="845" y="320" text-anchor="middle" class="t">Normalized fiscal model</text>
+  <text x="845" y="350" text-anchor="middle" class="t">Declarative DQ</text>
+  <text x="845" y="380" text-anchor="middle" class="t">Cancellation state</text>
+
+  <rect x="1070" y="180" width="270" height="280" class="box" fill="#564816" stroke="#e7ca57"/>
+  <text x="1205" y="235" text-anchor="middle" class="h">Gold Delta</text>
+  <text x="1205" y="275" text-anchor="middle" class="t">Issuer SCD Type 2</text>
+  <text x="1205" y="310" text-anchor="middle" class="t">Product SCD Type 2</text>
+  <text x="1205" y="345" text-anchor="middle" class="t">Item-grain fact</text>
+  <text x="1205" y="380" text-anchor="middle" class="t">Revenue aggregate</text>
+  <text x="1205" y="415" text-anchor="middle" class="t">Tax-burden aggregate</text>
+
+  <rect x="1070" y="555" width="270" height="130" class="box" fill="#163b3a" stroke="#5fd3c8"/>
+  <text x="1205" y="605" text-anchor="middle" class="h">Audit surface</text>
+  <text x="1205" y="640" text-anchor="middle" class="t">History · version · diff</text>
+  <text x="1205" y="670" text-anchor="middle" class="t">Commit userMetadata</text>
+
+  <rect x="1420" y="260" width="130" height="330" class="box" fill="#16324a" stroke="#60a5fa"/>
+  <text x="1485" y="315" text-anchor="middle" class="h">MinIO</text>
+  <text x="1485" y="350" text-anchor="middle" class="t">S3A</text>
+  <text x="1485" y="405" text-anchor="middle" class="t">bronze/</text>
+  <text x="1485" y="440" text-anchor="middle" class="t">silver/</text>
+  <text x="1485" y="475" text-anchor="middle" class="t">gold/</text>
+  <text x="1485" y="530" text-anchor="middle" class="t">Delta log</text>
+
+  <path d="M290 375 H370" class="edge"/><path d="M630 315 H710" class="edge"/>
+  <path d="M970 315 H1060" class="edge"/><path d="M1205 460 V545" class="edge"/>
+  <path d="M505 400 V500" class="edge"/><path d="M630 580 C700 580 680 390 720 360" class="edge"/>
+  <path d="M1340 320 H1410" class="edge"/><path d="M970 350 C1110 500 1290 505 1410 470" class="edge"/>
+  <path d="M630 270 C900 120 1250 130 1410 325" class="edge"/>
+
+  <text x="800" y="815" text-anchor="middle" class="note">One Python package · profile-aware session/naming/paths · no Databricks account required</text>
+  <text x="800" y="850" text-anchor="middle" class="note">All data is synthetic; no real taxpayer or personal data</text>
+</svg>
