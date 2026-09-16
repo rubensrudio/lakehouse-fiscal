@@ -60,3 +60,4 @@ def test_teardown_removes_persistent_local_catalog() -> None:
     teardown = (ROOT / "scripts/teardown_local.sh").read_text(encoding="utf-8")
     assert "metastore_db spark-warehouse" in teardown
     assert "derby.log" in teardown
+    assert "exec -T --user 0 spark" in teardown
